@@ -179,3 +179,41 @@ jobs:
           name: backend-coverage
           path: backend/coverage/
           if-no-files-found: warn
+
+  publish-image:
+    name: publish-image
+    runs-on: ubuntu-latest
+    needs: [lint, build, test]
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-dist
+          path: backend/dist/
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/jurcek210/fakturto-backend:latest
+            ghcr.io/jurcek210/fakturto-backend:${{ github.sha }}
