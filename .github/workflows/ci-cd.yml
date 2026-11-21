@@ -80,6 +80,9 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
+      - name: Create temporary environment file
+        run: touch .env
+
       - name: Generate Prisma Client
         working-directory: ./backend
         run: npx prisma generate
