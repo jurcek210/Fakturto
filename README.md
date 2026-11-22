@@ -154,3 +154,37 @@ Repozitorij uporablja strategijo [GitHub Flow](https://docs.github.com/en/get-st
 4. Po pregledu pull request združimo v `main`; veja `main` je vedno v delujočem stanju.
 
 Veja `main` je zaščitena: neposredni push, prisilno prepisovanje zgodovine in brisanje niso dovoljeni, spremembe se združujejo izključno prek pull requestov.
+
+## CI/CD – neprekinjena integracija in dostava
+
+![CI/CD Status](https://github.com/jurcek210/Fakturto/actions/workflows/ci-cd.yml/badge.svg)
+
+### Nameščena aplikacija
+
+Aplikacija Fakturto je nameščena v oblačnem okolju in dostopna prek naslednjih povezav:
+
+- **Frontend (Vercel):** https://fakturto-frontend.vercel.app
+- **Backend (Render):** https://fakturto-backend-latest.onrender.com
+- **GitHub repozitorij:** https://github.com/jurcek210/Fakturto
+
+### Opis CI/CD cevovoda
+
+Za avtomatizacijo preverjanja, gradnje in nameščanja aplikacije uporabljamo GitHub Actions. Cevovod je definiran v datoteki `.github/workflows/ci-cd.yml`.
+
+Ob ustvarjenem Pull Requestu v vejo `main` se samodejno sprožijo preverjanja kode. Po uspešni združitvi sprememb v vejo `main` se izvedeta še objava in namestitev aplikacije.
+
+Cevovod sestavljajo naslednje faze:
+
+1. **Lint:** Preverjanje kakovosti kode frontenda in backenda z orodjem ESLint.
+2. **Build:** Gradnja React/Vite frontenda in TypeScript/Node.js backenda ter priprava artefaktov.
+3. **Test:** Izvajanje avtomatskih testov z orodjem Vitest in priprava poročil o pokritosti kode.
+4. **Publish Image:** Izgradnja in objava Docker slike backenda v GitHub Container Registry (GHCR).
+5. **Migrate:** Samodejno izvajanje migracij PostgreSQL podatkovne baze z orodjem Prisma.
+6. **Deploy Backend:** Sprožitev namestitve nove Docker slike na Render prek Deploy Hooka.
+7. **Deploy Frontend:** Gradnja in objava frontenda na Vercel z uporabo Vercel CLI.
+
+### Zaščita glavne veje
+
+Veja `main` je zaščitena. Spremembe se vanjo vključujejo prek Pull Requestov, pri čemer morajo biti preverjanja `lint`, `build` in `test` uspešno zaključena.
+
+S tem zagotovimo, da se pred združitvijo preveri pravilnost kode, po združitvi pa se samodejno izvede postopek dostave aplikacije.
